@@ -82,10 +82,11 @@ First, I created a database inventory, locally on my machine, with a table produ
 
 
 
-Deployed: https://luciamacakova.pythonanywhere.com/
+Deployed at: https://luciamacakova.pythonanywhere.com\
 
 
 Contact:\
 Lucia Macakova\
 email: G00439449@atu.ie
+
 
