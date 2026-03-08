@@ -3,7 +3,7 @@
 
 ---
 
-This project was developed as part of the Programming and Scripting module during my study at ATU. It is a Flask [^1] web application that provides create, update, search, and delete functions, along with a print function.
+A Flask [^1] web application that provides create, update, search, and delete functions, along with a print function.
 
 ---
 
@@ -84,12 +84,6 @@ First, I created a database inventory, locally on my machine, with a table produ
 
 ## Deployment:
 https://luciamacakova.pythonanywhere.com
-
----
-
-## Contact:
-Lucia Macakova\
-email: G00439449@atu.ie
 
 ---
 
