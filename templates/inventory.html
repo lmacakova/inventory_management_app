@@ -5,327 +5,609 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Inventory Management</title>
 
-  <!-- Flask static link to css file -->
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"/>
-    <!--External libraries-->
+
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.2/jspdf.umd.min.js"></script>
 </head>
 <body>
   <div class="pad">
-    <div class="header">
-      <h1>Inventory Management</h1>
-      <p id="dateTime"></p>
-    </div>
+    <header class="header">
+      <div>
+        <h1>Inventory Management</h1>
+        <p class="subtitle"></p>
+      </div>
+      <div class="header-right">
+        <div class="datetime-label">Current Time</div>
+        <div id="dateTime"></div>
+      </div>
+    </header>
 
-    <div class="cont-section">
-      <div class="container-search">
-        <h2>Search Products</h2>
-        <div id="search-form">
-          <select id="search-type">
-            <option id="name" value="name">Name</option>
-            <option value="description">Description</option>
-            <option value="category">Category</option>
-            <option value="supplier">Supplier</option>
-            <option value="quantity">Quantity</option>
-            <option value="id">ID</option>
-          </select>
-          <input type="text" id="search-term" />
-          <br/>
-          <button id="search-btn" type="button">Search</button>
+    <section class="status">
+      <p id="status" data-kind="info">Ready.</p>
+    </section>
+
+    <section class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-label">Total Products</span>
+        <strong class="stat-value" id="stat-total-products">0</strong>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Low Stock Items</span>
+        <strong class="stat-value" id="stat-low-stock">0</strong>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Inventory Value</span>
+        <strong class="stat-value" id="stat-total-value">€0.00</strong>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Suppliers</span>
+        <strong class="stat-value" id="stat-suppliers">0</strong>
+      </div>
+    </section>
+
+    <section class="content-grid">
+      <div class="left-column">
+        <div class="card">
+          <h2>Search Products</h2>
+          <div class="grid-2">
+            <div>
+              <label for="search-type">Search by</label>
+              <select id="search-type">
+                <option value="name">Name</option>
+                <option value="description">Description</option>
+                <option value="category">Category</option>
+                <option value="supplier">Supplier</option>
+                <option value="quantity">Quantity</option>
+                <option value="id">ID</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="search-term">Search term</label>
+              <input type="text" id="search-term" placeholder="Enter your search term" />
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button id="search-btn" type="button" class="btn btn-primary">Search</button>
+            <button type="button" class="btn" onclick="fetchProducts()">Get All Products</button>
+            <button type="button" class="btn" onclick="clearSearch()">Clear Search</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Add New Product</h2>
+          <form class="form grid-2" onsubmit="return false;">
+            <div>
+              <label for="product-name">Name</label>
+              <input type="text" id="product-name" />
+            </div>
+
+            <div>
+              <label for="product-category">Category</label>
+              <input type="text" id="product-category" />
+            </div>
+
+            <div class="col-2">
+              <label for="product-desc">Description</label>
+              <input type="text" id="product-desc" />
+            </div>
+
+            <div>
+              <label for="product-quantity">Quantity</label>
+              <input type="number" id="product-quantity" min="0" />
+            </div>
+
+            <div>
+              <label for="product-price">Price</label>
+              <input type="number" id="product-price" min="0" step="0.01" />
+            </div>
+
+            <div class="col-2">
+              <label for="product-supplier">Supplier</label>
+              <input type="text" id="product-supplier" />
+            </div>
+
+            <div class="col-2 form-actions">
+              <button id="add-product-btn" type="button" class="btn btn-primary">Add Product</button>
+              <button type="button" class="btn" onclick="clearAddForm()">Clear Form</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card" id="edit-card" style="display:none;">
+          <h2>Edit Product</h2>
+          <form class="form grid-2" onsubmit="return false;">
+            <input type="hidden" id="edit-product-id" />
+
+            <div>
+              <label for="edit-product-name">Name</label>
+              <input type="text" id="edit-product-name" />
+            </div>
+
+            <div>
+              <label for="edit-product-category">Category</label>
+              <input type="text" id="edit-product-category" />
+            </div>
+
+            <div class="col-2">
+              <label for="edit-product-desc">Description</label>
+              <input type="text" id="edit-product-desc" />
+            </div>
+
+            <div>
+              <label for="edit-product-quantity">Quantity</label>
+              <input type="number" id="edit-product-quantity" min="0" />
+            </div>
+
+            <div>
+              <label for="edit-product-price">Price</label>
+              <input type="number" id="edit-product-price" min="0" step="0.01" />
+            </div>
+
+            <div class="col-2">
+              <label for="edit-product-supplier">Supplier</label>
+              <input type="text" id="edit-product-supplier" />
+            </div>
+
+            <div class="col-2 form-actions">
+              <button type="button" id="update-product-btn" class="btn btn-primary">Update Product</button>
+              <button type="button" class="btn" onclick="cancelEdit()">Cancel</button>
+            </div>
+          </form>
         </div>
       </div>
 
-      <div class="container-add-product">
-        <h2>Add New Product</h2>
-        <form class="form" onsubmit="return false;">
-          <label for="product-name">Name: </label>
-          <input type="text" id="product-name"/><br/>
-          <label for="product-desc">Description: </label>
-          <input type="text" id="product-desc"/><br/>
-          <label for="product-category">Category: </label>
-          <input type="text" id="product-category"/><br/>
-          <label for="product-quantity">Quantity: </label>
-          <input type="number" id="product-quantity"/><br/>
-          <label for="product-price">Price: </label>
-          <input type="number" id="product-price"/><br/>
-          <label for="product-supplier">Supplier: </label>
-          <input type="text" id="product-supplier"/><br/>
-          <button id="add-product-btn" type="button">Add Product</button>
-        </form>
+      <div class="right-column">
+        <div class="card">
+          <div class="list-topbar">
+            <div>
+              <h2>Product List</h2>
+              <p class="muted"></p>
+            </div>
+
+            <div class="actions">
+
+              <button type="button" class="btn" onclick="clearList()">Clear</button>
+              <button type="button" class="btn btn-primary" onclick="printList()">Export PDF</button>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Description</th>
+                  <th>Category</th>
+                  <th>Quantity</th>
+                  <th>Price</th>
+                  <th>Supplier</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="product-list-body">
+                <tr>
+                  <td colspan="9" class="empty-cell"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="pager" id="pager"></div>
+        </div>
       </div>
-
-      <div class="container-edit-product">
-        <h2>Edit Product</h2>
-        <form class="form" onsubmit="return false;">
-          <input type="hidden" id="edit-product-id" />
-          <label for="edit-product-name">Name: </label>
-          <input type="text" id="edit-product-name" /><br/>
-          <label for="edit-product-desc">Description: </label>
-          <input type="text" id="edit-product-desc" /><br/>
-          <label for="edit-product-category">Category: </label>
-          <input type="text" id="edit-product-category" /><br/>
-          <label for="edit-product-quantity">Quantity: </label>
-          <input type="number" id="edit-product-quantity" /><br/>
-          <label for="edit-product-price">Price: </label>
-          <input type="number" id="edit-product-price" /><br/>
-          <label for="edit-product-supplier">Supplier: </label>
-          <input type="text" id="edit-product-supplier" /><br/>
-          <button type="button" id="update-product-btn">Update Product</button>
-        </form>
-      </div>
-    </div>
-
-    <div class="list-products">
-      <h2>Product List</h2>
-      <button type="button" onclick="fetchProducts()">Get All Products</button>
-      <button type="button" onclick="clearList()">Clear</button>
-      <button type="button" onclick="printList()">Print</button>
-      <ul id="product-list"></ul>
-    </div>
-
-    <div class="footer">
-      <p></p>
-    </div>
+    </section>
   </div>
 
-  <script>/* As webpage/aplication is rendered by web browser from up to down (<head> to </body>)
-  I decided to place the scripts in the bottom before </body>. This prevent the scripts to be rendered
-  before appropriate element */
-    // CRUD
-    // Fetch all products
-    function fetchProducts() {
-      $.ajax({
-        url: '/api/products',
-        type: 'GET',
-        success: function(data) {
-          let productList = $('#product-list');
-          productList.empty();
-          data.forEach(function(product) {
-            let listItem = `
-              <li>
-                ID: ${product.id}, Name: ${product.name}, Description: ${product.description},
-                Category: ${product.category}, Quantity: ${product.quantity}, Price: ${product.price},
-                Supplier: ${product.supplier}
-                <button type="button" onclick="loadProductForEdit(${product.id})">Edit</button>
-                <button type="button" onclick="deleteProduct(${product.id})">Delete</button>
-              </li>`;
-            productList.append(listItem);
-          });
-        },
-        error: function() { alert('Error fetching products'); }
-      });
-    }
-    // Search
-    function searchProduct() {
-      let searchType = $('#search-type').val();
-      let searchTerm = $('#search-term').val();
+  <script>
+    let allProducts = [];
+    let currentProducts = [];
+    let currentPage = 1;
+    const pageSize = 6;
 
-      $.ajax({
-        url: `/api/products/search/${searchType}`,
-        type: 'GET',
-        data: { [searchType]: searchTerm },
-        success: function(data) {
-          let productList = $('#product-list');
-          productList.empty();
-          if (data && data.length > 0) {
-            data.forEach(function(product) {
-              let listItem = `
-                <li>
-                  ID: ${product.id}, Name: ${product.name}, Description: ${product.description},
-                  Category: ${product.category}, Quantity: ${product.quantity},
-                  Supplier: ${product.supplier}
-                  <button type="button" onclick="loadProductForEdit(${product.id})">Edit</button>
-                  <button type="button" onclick="deleteProduct(${product.id})">Delete</button>
-                </li>`;
-              productList.append(listItem);
-            });
-          } else {
-            productList.append('<li>No product found with this search.</li>');
-          }
-        },
-        error: function() { alert('Error searching products'); }
-      });
+    function setStatus(message, kind = "info") {
+      $("#status").text(message).attr("data-kind", kind);
     }
 
-    // Add
-    function addProduct() {
-      let productData = {
-        name: $('#product-name').val(),
-        description: $('#product-desc').val(),
-        category: $('#product-category').val(),
-        quantity: $('#product-quantity').val(),
-        price: $('#product-price').val(),
-        supplier: $('#product-supplier').val()
-      };
-
-      $.ajax({
-        url: '/api/products',
-        type: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify(productData),
-        success: function(response) {
-          alert(response.message);
-          fetchProducts();
-        },
-        error: function(error) {
-          alert((error.responseJSON && error.responseJSON.error) || 'Error adding product');
-        }
-      });
-    }
-
-    // Load for edit
-    function loadProductForEdit(productId) {
-      $.ajax({
-        url: `/api/products/${productId}`,
-        type: 'GET',
-        success: function(product) {
-          $('#edit-product-id').val(product.id);
-          $('#edit-product-name').val(product.name);
-          $('#edit-product-desc').val(product.description);
-          $('#edit-product-category').val(product.category);
-          $('#edit-product-quantity').val(product.quantity);
-          $('#edit-product-price').val(product.price);
-          $('#edit-product-supplier').val(product.supplier);
-          $('.container-edit-product').show();
-        },
-        error: function() { alert('Error loading product for edit'); }
-      });
-    }
-
-    // Update
-    function updateProduct() {
-      let productId = $('#edit-product-id').val();
-      let productData = {
-        name: $('#edit-product-name').val(),
-        description: $('#edit-product-desc').val(),
-        category: $('#edit-product-category').val(),
-        quantity: $('#edit-product-quantity').val(),
-        price: $('#edit-product-price').val(),
-        supplier: $('#edit-product-supplier').val()
-      };
-
-      $.ajax({
-        url: `/api/products/${productId}`,
-        type: 'PUT',
-        contentType: 'application/json',
-        data: JSON.stringify(productData),
-        success: function(response) {
-          alert(response.message);
-          fetchProducts();
-          $('.container-edit-product').hide();
-        },
-        error: function(error) {
-          alert((error.responseJSON && error.responseJSON.error) || 'Error updating product');
-        }
-      });
-    }
-
-    // Delete
-    function deleteProduct(productId) {
-      $.ajax({
-        url: `/api/products/${productId}`,
-        type: 'DELETE',
-        success: function(response) {
-          alert(response.message);
-          fetchProducts();
-        },
-        error: function() { alert('Error deleting product'); }
-      });
-    }
-    // Date/time header
     function updateClock() {
-      document.getElementById("dateTime").textContent = new Date().toLocaleString();      
+      document.getElementById("dateTime").textContent = new Date().toLocaleString();
     }
-    
-    // Clearing list
-    function clearList() { $('#product-list').empty(); }
-    // Printing list
-    function printList() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' });
 
-      // Layout constants
-      const margin = 40;                               // page margin (pts)
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const pageHeight = doc.internal.pageSize.getHeight();
-      const contentWidth = pageWidth - margin * 2;     // usable width
-      const lineHeight = 16;                           // text line height
-      const bodyFontSize = 11;
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
 
-      // Collect items
-      const items = Array.from(document.querySelectorAll('#product-list li'))
-        .map(li => li.textContent.trim())
-        .filter(Boolean);
+    function getStatusBadge(quantity) {
+      const qty = Number(quantity) || 0;
+      if (qty === 0) {
+        return '<span class="badge badge-out">Out of Stock</span>';
+      }
+      if (qty < 20) {
+        return '<span class="badge badge-low">Low Stock</span>';
+      }
+      return '<span class="badge badge-in">In Stock</span>';
+    }
 
-      if (items.length === 0) {
-        alert('There are no items to print.');
+    function updateStats(products) {
+      const totalProducts = products.length;
+      const lowStockItems = products.filter(p => (Number(p.quantity) || 0) < 20).length;
+      const totalValue = products.reduce((sum, p) => {
+        return sum + ((Number(p.quantity) || 0) * (Number(p.price) || 0));
+      }, 0);
+      const suppliers = new Set(
+        products
+          .map(p => (p.supplier || "").trim())
+          .filter(Boolean)
+      );
+
+      $("#stat-total-products").text(totalProducts);
+      $("#stat-low-stock").text(lowStockItems);
+      $("#stat-total-value").text(`€${totalValue.toFixed(2)}`);
+      $("#stat-suppliers").text(suppliers.size);
+    }
+
+    function renderProducts(products) {
+      const tbody = $("#product-list-body");
+      tbody.empty();
+
+      updateStats(products);
+
+      if (!products.length) {
+        tbody.append(`
+          <tr>
+            <td colspan="9" class="empty-cell">No products found.</td>
+          </tr>
+        `);
+        $("#pager").empty();
         return;
       }
 
-      // Timestamp
+      const totalPages = Math.ceil(products.length / pageSize);
+      if (currentPage > totalPages) currentPage = totalPages;
+
+      const start = (currentPage - 1) * pageSize;
+      const items = products.slice(start, start + pageSize);
+
+      items.forEach(product => {
+        tbody.append(`
+          <tr>
+            <td data-header="ID">${escapeHtml(product.id)}</td>
+            <td data-header="Name"><strong>${escapeHtml(product.name)}</strong></td>
+            <td data-header="Description">${escapeHtml(product.description || "")}</td>
+            <td data-header="Category">${escapeHtml(product.category || "")}</td>
+            <td data-header="Quantity">${escapeHtml(product.quantity)}</td>
+            <td data-header="Price">€${Number(product.price || 0).toFixed(2)}</td>
+            <td data-header="Supplier">${escapeHtml(product.supplier || "")}</td>
+            <td data-header="Status">${getStatusBadge(product.quantity)}</td>
+            <td data-header="Actions">
+              <div class="table-actions">
+                <button type="button" class="btn btn-small" onclick="loadProductForEdit(${product.id})">Edit</button>
+                <button type="button" class="btn btn-danger btn-small" onclick="deleteProduct(${product.id})">Delete</button>
+              </div>
+            </td>
+          </tr>
+        `);
+      });
+
+      renderPager(products.length);
+    }
+
+    function renderPager(totalItems) {
+      const pager = $("#pager");
+      pager.empty();
+
+      const totalPages = Math.ceil(totalItems / pageSize);
+      if (totalPages <= 1) return;
+
+      pager.append(`<span class="pager-info">Page ${currentPage} of ${totalPages}</span>`);
+      pager.append(`<button type="button" ${currentPage === 1 ? "disabled" : ""} onclick="goToPage(${currentPage - 1})">Previous</button>`);
+
+      for (let i = 1; i <= totalPages; i++) {
+        pager.append(`<button type="button" ${i === currentPage ? "disabled" : ""} onclick="goToPage(${i})">${i}</button>`);
+      }
+
+      pager.append(`<button type="button" ${currentPage === totalPages ? "disabled" : ""} onclick="goToPage(${currentPage + 1})">Next</button>`);
+    }
+
+    function goToPage(page) {
+      currentPage = page;
+      renderProducts(currentProducts);
+    }
+
+    function normaliseListResponse(data) {
+      if (Array.isArray(data)) return data;
+      if (data && typeof data === "object") return [data];
+      return [];
+    }
+
+    function fetchProducts() {
+      $.ajax({
+        url: "/api/products",
+        type: "GET",
+        success: function(data) {
+          allProducts = normaliseListResponse(data);
+          currentProducts = [...allProducts];
+          currentPage = 1;
+          renderProducts(currentProducts);
+          setStatus(`Loaded ${currentProducts.length} product(s).`, "info");
+        },
+        error: function() {
+          setStatus("Error fetching products.", "error");
+        }
+      });
+    }
+
+    function searchProduct() {
+      const searchType = $("#search-type").val();
+      const searchTerm = $("#search-term").val().trim();
+
+      if (!searchTerm) {
+        setStatus("Enter a search term first.", "warn");
+        return;
+      }
+
+      $.ajax({
+        url: `/api/products/search/${searchType}`,
+        type: "GET",
+        data: { [searchType]: searchTerm },
+        success: function(data) {
+          currentProducts = normaliseListResponse(data);
+          currentPage = 1;
+          renderProducts(currentProducts);
+          setStatus(`Found ${currentProducts.length} matching product(s).`, "info");
+        },
+        error: function(xhr) {
+          const msg = xhr.responseJSON?.error || "Error searching products.";
+          setStatus(msg, "error");
+        }
+      });
+    }
+
+    function validateProductData(productData) {
+      if (!productData.name) return "Name is required.";
+      if (!productData.category) return "Category is required.";
+      if (productData.quantity === "" || Number(productData.quantity) < 0) return "Quantity must be 0 or greater.";
+      if (productData.price === "" || Number(productData.price) < 0) return "Price must be 0 or greater.";
+      if (!productData.supplier) return "Supplier is required.";
+      return null;
+    }
+
+    function addProduct() {
+      const productData = {
+        name: $("#product-name").val().trim(),
+        description: $("#product-desc").val().trim(),
+        category: $("#product-category").val().trim(),
+        quantity: $("#product-quantity").val(),
+        price: $("#product-price").val(),
+        supplier: $("#product-supplier").val().trim()
+      };
+
+      const error = validateProductData(productData);
+      if (error) {
+        setStatus(error, "warn");
+        return;
+      }
+
+      $.ajax({
+        url: "/api/products",
+        type: "POST",
+        contentType: "application/json",
+        data: JSON.stringify(productData),
+        success: function(response) {
+          setStatus(response.message || "Product added.", "info");
+          clearAddForm();
+          fetchProducts();
+        },
+        error: function(xhr) {
+          const msg = xhr.responseJSON?.error || "Error adding product.";
+          setStatus(msg, "error");
+        }
+      });
+    }
+
+    function loadProductForEdit(productId) {
+      $.ajax({
+        url: `/api/products/${productId}`,
+        type: "GET",
+        success: function(product) {
+          $("#edit-product-id").val(product.id);
+          $("#edit-product-name").val(product.name);
+          $("#edit-product-desc").val(product.description);
+          $("#edit-product-category").val(product.category);
+          $("#edit-product-quantity").val(product.quantity);
+          $("#edit-product-price").val(product.price);
+          $("#edit-product-supplier").val(product.supplier);
+
+          $("#edit-card").show();
+          setStatus(`Editing product ID ${product.id}.`, "info");
+          window.scrollTo({ top: $("#edit-card").offset().top - 20, behavior: "smooth" });
+        },
+        error: function() {
+          setStatus("Error loading product for edit.", "error");
+        }
+      });
+    }
+
+    function updateProduct() {
+      const productId = $("#edit-product-id").val();
+      const productData = {
+        name: $("#edit-product-name").val().trim(),
+        description: $("#edit-product-desc").val().trim(),
+        category: $("#edit-product-category").val().trim(),
+        quantity: $("#edit-product-quantity").val(),
+        price: $("#edit-product-price").val(),
+        supplier: $("#edit-product-supplier").val().trim()
+      };
+
+      const error = validateProductData(productData);
+      if (error) {
+        setStatus(error, "warn");
+        return;
+      }
+
+      $.ajax({
+        url: `/api/products/${productId}`,
+        type: "PUT",
+        contentType: "application/json",
+        data: JSON.stringify(productData),
+        success: function(response) {
+          setStatus(response.message || "Product updated.", "info");
+          cancelEdit();
+          fetchProducts();
+        },
+        error: function(xhr) {
+          const msg = xhr.responseJSON?.error || "Error updating product.";
+          setStatus(msg, "error");
+        }
+      });
+    }
+
+    function deleteProduct(productId) {
+      if (!confirm("Are you sure you want to delete this product?")) return;
+
+      $.ajax({
+        url: `/api/products/${productId}`,
+        type: "DELETE",
+        success: function(response) {
+          setStatus(response.message || "Product deleted.", "info");
+          fetchProducts();
+        },
+        error: function(xhr) {
+          const msg = xhr.responseJSON?.error || "Error deleting product.";
+          setStatus(msg, "error");
+        }
+      });
+    }
+
+    function clearList() {
+      currentProducts = [];
+      currentPage = 1;
+      renderProducts([]);
+      setStatus("List cleared from view.", "info");
+    }
+
+    function clearSearch() {
+      $("#search-type").val("name");
+      $("#search-term").val("");
+      currentProducts = [...allProducts];
+      currentPage = 1;
+      renderProducts(currentProducts);
+      setStatus("Search cleared.", "info");
+    }
+
+    function clearAddForm() {
+      $("#product-name").val("");
+      $("#product-desc").val("");
+      $("#product-category").val("");
+      $("#product-quantity").val("");
+      $("#product-price").val("");
+      $("#product-supplier").val("");
+    }
+
+    function cancelEdit() {
+      $("#edit-card").hide();
+      $("#edit-product-id").val("");
+      $("#edit-product-name").val("");
+      $("#edit-product-desc").val("");
+      $("#edit-product-category").val("");
+      $("#edit-product-quantity").val("");
+      $("#edit-product-price").val("");
+      $("#edit-product-supplier").val("");
+    }
+
+    function printList() {
+      const items = currentProducts.length ? currentProducts : allProducts;
+
+      if (!items.length) {
+        setStatus("There are no products to export.", "warn");
+        return;
+      }
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
+
+      const margin = 40;
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const contentWidth = pageWidth - margin * 2;
+      const lineHeight = 15;
       const timestamp = new Date().toLocaleString();
 
-      // Header renderer (called on page 1 and each new page)
       function drawHeader(pageNum) {
         let y = margin;
-        doc.setFont('courier', 'bold');
-        doc.setFontSize(14);
-        doc.text('Product List', margin, y);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(16);
+        doc.text("ClayStock Product Report", margin, y);
 
-        doc.setFont('courier', 'normal');
+        doc.setFont("helvetica", "normal");
         doc.setFontSize(10);
-        doc.text(`Generated on: ${timestamp}`, pageWidth - margin, y, { align: 'right' });
+        doc.text(`Generated on: ${timestamp}`, pageWidth - margin, y, { align: "right" });
+        doc.text(`Page ${pageNum}`, pageWidth - margin, pageHeight - 12, { align: "right" });
 
-        // Footer-style page number
-        doc.setFontSize(9);
-        doc.text(`Page ${pageNum}`, pageWidth - margin, pageHeight - 10, { align: 'right' });
-
-        return y + 18; // content starts below header
+        return y + 24;
       }
 
       let pageNum = 1;
       let y = drawHeader(pageNum);
 
-      doc.setFont('courier', 'normal');
-      doc.setFontSize(bodyFontSize);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
 
-      items.forEach(item => {
-        // Wrap each item to the available width
-        const wrappedLines = doc.splitTextToSize(item, contentWidth);
+      items.forEach(product => {
+        const lines = [
+          `ID: ${product.id}`,
+          `Name: ${product.name}`,
+          `Description: ${product.description || ""}`,
+          `Category: ${product.category || ""}`,
+          `Quantity: ${product.quantity}`,
+          `Price: €${Number(product.price || 0).toFixed(2)}`,
+          `Supplier: ${product.supplier || ""}`
+        ];
 
-        wrappedLines.forEach(line => {
-          // Page break if needed
-          if (y + lineHeight > pageHeight - margin) {
-            doc.addPage();
-            pageNum += 1;
-            y = drawHeader(pageNum);
-            doc.setFont('courier', 'normal');
-            doc.setFontSize(bodyFontSize);
-          }
-          doc.text(line, margin, y);
-          y += lineHeight;
+        lines.forEach(line => {
+          const wrappedLines = doc.splitTextToSize(line, contentWidth);
+
+          wrappedLines.forEach(part => {
+            if (y + lineHeight > pageHeight - margin) {
+              doc.addPage();
+              pageNum += 1;
+              y = drawHeader(pageNum);
+              doc.setFont("helvetica", "normal");
+              doc.setFontSize(11);
+            }
+
+            doc.text(part, margin, y);
+            y += lineHeight;
+          });
         });
 
-        // extra spacing between items (optional)
-        y += 4;
+        y += 8;
       });
 
-      // Open browser print dialog
       doc.autoPrint();
-      window.open(doc.output('bloburl'), '_blank');
+      window.open(doc.output("bloburl"), "_blank");
     }
-    // Wire up buttons after DOM is ready
+
     $(function() {
-      $('#search-btn').on('click', searchProduct);
-      $('#add-product-btn').on('click', addProduct);
-      $('#update-product-btn').on('click', updateProduct);
-      // Optionally: fetchProducts(); // auto-load on page open
+      $("#search-btn").on("click", searchProduct);
+      $("#add-product-btn").on("click", addProduct);
+      $("#update-product-btn").on("click", updateProduct);
+
+      updateClock();
+      setInterval(updateClock, 1000);
+      //fetchProducts();
     });
-    // Start the clock
-    updateClock();                  // render immediately
-    setInterval(updateClock, 1000); // update every second
-  
   </script>
 </body>
 </html>
+
+
