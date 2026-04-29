@@ -3,11 +3,9 @@
 
 ---
 
-A Flask [^1] web application that provides create, update, search, and delete functions, along with a print function.
+Fullstack web application for managing inventory items that provides create, update, search, and delete functions, along with a print function. Made with Flask [^1].
 
 ---
-
-Fullstack web application for managing inventory items.
 
 ## Features
 - Create, update, delete, and view products (CRUD operations)
@@ -102,11 +100,6 @@ c.  Update database connection settings in inventorydao.py with:
 
 ## Methodics:
 First, I created a database inventory, locally on my machine, with a table product and parameters: Name, description, quantity, category, price, and supplier. Then, I made a data access object file[^2] (inventorydao.py), which connects the database with the server file (inventory_server.py) and handles SQL queries with methods (or functions) for search, fetch, add, update, and delete products.  The inventory_server.py, which I made, is the main entry point of the web application. The file contains the code that creates the web server, defines routes, and connects everything together. Database, DAO, and server file create the back-end[^3] of the application. The back-end is the behind-the-scenes part of a web application. It is everything that happens on the server side — things users don't see directly in their browsers. The front-end is the part of a web application that users see and interact with directly in their browsers. An HTML file (in my case, inventory.html in the folder templates) contains the hypertext markup code[^4] that defines the structure and content of a web page or application visible to users. Document object model (DOM)[^5] of the web application/page is constructed as a tree of objects. The DOM turns every element (tags, text, attributes) into an object that can be accessed and modified by code (JavaScript, jQuery, AJAX calls). For my application, I decided to create a DOM structure where, in the background, there is a main table divided into blocks by functions - header, buttons, formulas, and product list. The style of the application is defined by the style.css file in the static folder. CSS[^6] means cascade style sheet - in which elements of the DOM are styled. 
-
----
-
-## Deployment:
-https://luciamacakova.pythonanywhere.com
 
 ---
 
