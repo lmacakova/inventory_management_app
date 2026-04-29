@@ -7,6 +7,29 @@ A Flask [^1] web application that provides create, update, search, and delete fu
 
 ---
 
+Fullstack web application for managing inventory items.
+
+## Features
+- Create, update, delete, and view products (CRUD operations)
+- Search functionality for filtering products
+- Backend API built with Flask
+- Integration with MySQL database
+- Data access layer using DAO pattern
+
+---
+
+## Tech Stack
+- Python (Flask)
+- MySQL
+- HTML, CSS, JavaScript
+
+---
+
+## Deployment
+https://luciamacakova.pythonanywhere.com
+
+---
+
 ## Repository Contents:
 inventory_server.py — Main Flask application file with API routes and CRUD logic.\
 inventorydao.py — Data access layer (database operations).\
